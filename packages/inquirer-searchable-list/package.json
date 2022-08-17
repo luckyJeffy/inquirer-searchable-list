@@ -28,12 +28,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/luckyJeffy/inquirer-searchable-list.git"
+    "url": "git+https://github.com/senoteam/inquirer-searchable-list.git"
   },
   "bugs": {
-    "url": "https://github.com/luckyJeffy/inquirer-searchable-list/issues"
+    "url": "https://github.com/senoteam/inquirer-searchable-list/issues"
   },
-  "homepage": "https://github.com/luckyJeffy/inquirer-searchable-list#readme",
+  "homepage": "https://github.com/senoteam/inquirer-searchable-list#readme",
   "scripts": {
     "test": "tsc && tsc-alias",
     "clean": "rimraf dist",
