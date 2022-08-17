@@ -1,0 +1,21 @@
+{
+  "exclude": "node_modules",
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "modules": false
+      }
+    ],
+    "@babel/preset-typescript"
+  ],
+  "plugins": [
+    [
+      "@babel/plugin-transform-runtime",
+      {
+        "corejs": 3,
+        "useESModules": true
+      }
+    ]
+  ]
+}

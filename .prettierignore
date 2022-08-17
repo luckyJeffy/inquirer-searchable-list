@@ -1,0 +1,13 @@
+.husky/
+dist/
+docs/
+node_modules/
+_*
+.*
+*.jpg
+*.png
+*.svg
+browserslist
+LICENSE
+index.es.js
+package*.json
