@@ -1,6 +1,6 @@
 {
   "name": "@senojs/inquirer-searchable-list",
-  "version": "0.2.0-beta.0",
+  "version": "0.2.0-beta.1",
   "description": "Inquirer list prompt, but searchable.",
   "type": "module",
   "main": "./dist/index.js",
@@ -51,5 +51,6 @@
   },
   "devDependencies": {
     "@types/inquirer": "^9.0.1"
-  }
+  },
+  "gitHead": "758e09a45bc9e21d3bea8bbea22a6fee2fdbfde8"
 }
