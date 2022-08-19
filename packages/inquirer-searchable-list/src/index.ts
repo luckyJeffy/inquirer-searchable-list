@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import figures from 'figures'
-import * as fuzzy from 'fuzzy'
+import { test as fuzzyTest } from 'fuzzy'
 import { filter, map, takeUntil } from 'rxjs'
 
 import Base from 'inquirer/lib/prompts/base'
@@ -26,45 +26,45 @@ type QuestionItem<T extends Answers = Answers> = Question<T> & {
   value?: unknown
 }
 
-// renderer is used to _display_ a row
-type Renderer = (item: QuestionItem, isSelected: boolean) => string
-
-// filterer is used to _fuzzy search_ a row
-// it's separate from renderer so you can search for non-visible text!
-type Filterer = (item: QuestionItem, query: string) => boolean
-
-function defaultFilterRow(choice: QuestionItem, query: string) {
-  if (!choice.name) return false
-
-  return fuzzy.test(query, choice.name)
-}
-
-function defaultRenderRow(choice: QuestionItem, isSelected: boolean) {
-  if (isSelected) return `${chalk.cyan(figures.pointer)}${chalk.cyan(choice?.name || '')}`
-
-  return ` ${choice.name}`
-}
-
-function renderChoices(renderRow: Renderer, choices: QuestionItem[], pointer: number) {
-  let output = ''
-
-  choices.forEach(function (choice, i) {
-    output += renderRow(choice, i === pointer)
-    output += '\n'
-  })
-
-  return output.replace(/\n$/, '')
-}
-
 class SearchableListPrompt<T extends QuestionItem = QuestionItem> extends Base<T> {
   private pointer = 0
+
   private selected: string | undefined = ''
+
   private done!: (state: unknown) => void
+
   private list: QuestionItem[] = []
+
   private filterList: QuestionItem[] = []
+
   private paginator: Paginator
-  private renderRow: Renderer = defaultRenderRow
-  private filterRow: Filterer = defaultFilterRow
+
+  private choicesToString(
+    rowRender: typeof this.rowRender,
+    choices: QuestionItem[],
+    pointer: number
+  ) {
+    let output = ''
+
+    choices.forEach(function (choice, i) {
+      output += rowRender(choice, i === pointer)
+      output += '\n'
+    })
+
+    return output.replace(/\n$/, '')
+  }
+
+  private rowRender(choice: QuestionItem, isSelected: boolean) {
+    if (isSelected) return `${chalk.cyan(figures.pointer)}${chalk.cyan(choice?.name || '')}`
+
+    return ` ${choice.name}`
+  }
+
+  private rowFilter(choice: QuestionItem, query: string) {
+    if (!choice.name) return false
+
+    return fuzzyTest(query, choice.name)
+  }
 
   constructor(question: T, readLine: ReadLineInterface, answers: Answers) {
     super(question, readLine, answers)
@@ -92,7 +92,7 @@ class SearchableListPrompt<T extends QuestionItem = QuestionItem> extends Base<T
       message += chalk.cyan(this.selected ? this.selected : '')
     } else {
       message += `${tip} ${this.rl.line}`
-      const choicesStr = renderChoices(this.renderRow, this.filterList, this.pointer)
+      const choicesStr = this.choicesToString(this.rowRender, this.filterList, this.pointer)
       bottomContent = this.paginator.paginate(choicesStr, this.pointer, this.opt.pageSize)
     }
 
@@ -104,7 +104,7 @@ class SearchableListPrompt<T extends QuestionItem = QuestionItem> extends Base<T
   }
 
   filterChoices() {
-    this.filterList = this.list.filter((choice) => this.filterRow(choice, this.rl.line))
+    this.filterList = this.list.filter((choice) => this.rowFilter(choice, this.rl.line))
   }
 
   onDownKey() {
