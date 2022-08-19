@@ -12,7 +12,15 @@ import { IGNORE_KEY_SET } from './constants'
 import type { Answers, Question } from 'inquirer'
 import type { Interface as ReadLineInterface } from 'readline'
 
-type QuestionItem = Question<Answers> & {
+declare module 'inquirer' {
+  interface QuestionMap<T> {
+    searchableList: QuestionItem<T> & {
+      type: 'searchable-list'
+    }
+  }
+}
+
+type QuestionItem<T extends Answers = Answers> = Question<T> & {
   id: number
   pageSize?: number
   value?: unknown
