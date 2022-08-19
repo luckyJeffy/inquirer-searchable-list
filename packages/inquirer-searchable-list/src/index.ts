@@ -9,7 +9,13 @@ import Paginator from 'inquirer/lib/utils/paginator'
 
 import { IGNORE_KEY_SET } from './constants'
 
-import type { Answers, Question } from 'inquirer'
+import type {
+  Answers,
+  AsyncDynamicQuestionProperty,
+  BaseChoiceMap,
+  DistinctChoice,
+  Question,
+} from 'inquirer'
 import type { Interface as ReadLineInterface } from 'readline'
 
 declare module 'inquirer' {
@@ -21,8 +27,9 @@ declare module 'inquirer' {
 }
 
 type QuestionItem<T extends Answers = Answers> = Question<T> & {
-  id: number
+  choices?: AsyncDynamicQuestionProperty<ReadonlyArray<DistinctChoice<T, BaseChoiceMap<T>>>, T>
   pageSize?: number
+  id?: number
   value?: unknown
 }
 
