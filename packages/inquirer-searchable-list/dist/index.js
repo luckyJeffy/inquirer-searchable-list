@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import figures from 'figures';
-import * as fuzzy from 'fuzzy';
+import { test } from 'fuzzy';
 import { map, takeUntil, filter } from 'rxjs';
 import Base from 'inquirer/lib/prompts/base';
 import Observe from 'inquirer/lib/utils/events';
@@ -8,32 +8,30 @@ import Paginator from 'inquirer/lib/utils/paginator';
 
 const IGNORE_KEY_SET = new Set(['up', 'down', 'space']);
 
-function defaultFilterRow(choice, query) {
-  if (!choice.name) return false;
-  return fuzzy.test(query, choice.name);
-}
-
-function defaultRenderRow(choice, isSelected) {
-  if (isSelected) return `${chalk.cyan(figures.pointer)}${chalk.cyan((choice === null || choice === void 0 ? void 0 : choice.name) || '')}`;
-  return ` ${choice.name}`;
-}
-
-function renderChoices(renderRow, choices, pointer) {
-  let output = '';
-  choices.forEach(function (choice, i) {
-    output += renderRow(choice, i === pointer);
-    output += '\n';
-  });
-  return output.replace(/\n$/, '');
-}
-
 class SearchableListPrompt extends Base {
   pointer = 0;
   selected = '';
   list = [];
   filterList = [];
-  renderRow = defaultRenderRow;
-  filterRow = defaultFilterRow;
+
+  choicesToString(rowRender, choices, pointer) {
+    let output = '';
+    choices.forEach(function (choice, i) {
+      output += rowRender(choice, i === pointer);
+      output += '\n';
+    });
+    return output.replace(/\n$/, '');
+  }
+
+  rowRender(choice, isSelected) {
+    if (isSelected) return `${chalk.cyan(figures.pointer)}${chalk.cyan((choice === null || choice === void 0 ? void 0 : choice.name) || '')}`;
+    return ` ${choice.name}`;
+  }
+
+  rowFilter(choice, query) {
+    if (!choice.name) return false;
+    return test(query, choice.name);
+  }
 
   constructor(question, readLine, answers) {
     super(question, readLine, answers);
@@ -63,7 +61,7 @@ class SearchableListPrompt extends Base {
       message += chalk.cyan(this.selected ? this.selected : '');
     } else {
       message += `${tip} ${this.rl.line}`;
-      const choicesStr = renderChoices(this.renderRow, this.filterList, this.pointer);
+      const choicesStr = this.choicesToString(this.rowRender, this.filterList, this.pointer);
       bottomContent = this.paginator.paginate(choicesStr, this.pointer, this.opt.pageSize);
     }
 
@@ -75,7 +73,7 @@ class SearchableListPrompt extends Base {
   }
 
   filterChoices() {
-    this.filterList = this.list.filter(choice => this.filterRow(choice, this.rl.line));
+    this.filterList = this.list.filter(choice => this.rowFilter(choice, this.rl.line));
   }
 
   onDownKey() {
